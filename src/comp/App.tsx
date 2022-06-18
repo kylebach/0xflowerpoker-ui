@@ -1,8 +1,8 @@
-import './App.css';
+import '../styles/App.css';
 
 import {ethers} from "ethers";
-import FP from '../0xflowerpoker/artifacts/contracts/FlowerPoker.sol/FlowerPoker.json';
-import {FlowerPoker} from "../0xflowerpoker/typechain-types";
+import FP from '../../0xflowerpoker/artifacts/contracts/FlowerPoker.sol/FlowerPoker.json';
+import {FlowerPoker} from "../../0xflowerpoker/typechain-types";
 import React, {ReactElement, useEffect, useState} from 'react';
 
 const ContractAddress = '0x73DD2F9a0A60897b38a0D5b82b4c9ED53a8a6db7';
@@ -17,7 +17,7 @@ export interface Match {
 	state: MatchState;
 }
 
-enum MatchResult {
+export enum MatchResult {
 	WAIT,
 	BUST,
 	PAIR,
@@ -28,7 +28,7 @@ enum MatchResult {
 	FIVE_OF_A_KIND
 }
 
-enum MatchState {
+export enum MatchState {
 	READY,
 	CANCELED,
 	PLANTED,
@@ -48,7 +48,7 @@ function App() {
 		getReadyMatches().finally()
 	}, []);
 
-	function initializeProvider(): FlowerPoker {
+	function getContract(): FlowerPoker {
 		if (contract !== undefined) return contract;
 		let providedContract;
 		if (window.ethereum) {
@@ -66,7 +66,7 @@ function App() {
 	async function makeOffer(event: any) {
 		event.preventDefault();
 		if (typeof window.ethereum !== "undefined") {
-			const contract: FlowerPoker = await initializeProvider();
+			const contract = await getContract();
 			try {
 				await contract.createMatch(ethers.utils.parseEther('' + askSize), {
 					value: ethers.utils.parseEther('' + askSize),
@@ -78,7 +78,7 @@ function App() {
 	}
 
 	async function getReadyMatches() {
-		const contract = await initializeProvider();
+		const contract = await getContract();
 		try {
 			let matchesReady = [], matchesCompleted = [];
 			let matchCount = await contract.matchCount();
@@ -103,6 +103,43 @@ function App() {
 		} catch (e) {
 			console.log("error getting ready matches: ", e);
 		}
+	}
+
+	function generateNewMatchForm(): ReactElement {
+		return (
+			<div>
+				<form onSubmit={makeOffer}>
+					<input
+						className="form-control"
+						value={askSize}
+						onChange={(event) => setAskSize(Number.parseFloat(event.target.value))}
+						name="askSize"
+						type="number"
+						step="0.1"
+						placeholder="enter amount"
+           			/>		
+					<button type="submit">Open Bet</button>
+				</form>
+			</div>
+		);
+	}
+
+	function acceptMatch(id: ethers.BigNumber, sum: ethers.BigNumber) {
+		const contract = getContract();
+		contract.acceptMatch(id, { value: sum, gasLimit: 150000 });
+	}
+
+	function generateAcceptMatchButton(id: ethers.BigNumber, sum: ethers.BigNumber, state: MatchState): ReactElement {
+		if (state !== MatchState.READY) {
+			return (
+				<div></div>
+			);
+		}
+		return (
+			<button onClick={() => acceptMatch(id, sum)}>
+				take bet
+			</button>
+		);
 	}
 
 	function generateTableFromMatches(matches: Match[]): ReactElement {
@@ -130,7 +167,7 @@ function App() {
 						<th>{MatchResult[it.player2Result]}</th>
 						<th>{MatchState[it.state]}</th>
 						<th>{ethers.utils.formatUnits(it.sum.toString()).substring(0, 5)}</th>
-						<th>{}</th>
+						<th>{generateAcceptMatchButton(it.id, it.sum, it.state)}</th>
 					</tr>)
 				}
 				</tbody>
@@ -140,9 +177,13 @@ function App() {
 
 	return (
 		<div className="App">
-			<div className="ActiveMatches">
+			<div className="matches">
+				ready matches
 				{generateTableFromMatches(matchesReady)}
+				past matches
 				{generateTableFromMatches(matchesCompleted)}
+				create a new match
+				{generateNewMatchForm()}
 			</div>
 		</div>
 	);
