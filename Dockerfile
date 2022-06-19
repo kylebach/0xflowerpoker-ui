@@ -1,4 +1,5 @@
-FROM node:16-bullseye-slim
+FROM node:16-alpine
+RUN apk add alpine-sdk python3
 RUN mkdir /app
 WORKDIR /app
 COPY . /app
