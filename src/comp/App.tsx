@@ -5,7 +5,7 @@ import '../styles/App.css';
 import {ethers} from 'ethers';
 import React, {ReactElement, useEffect} from 'react';
 import {useFlowerPokerContract} from '../hooks/useFlowerPokerContract';
-import {Match, MatchResult, MatchState} from '../utils/utils';
+import {Match, MatchResult, MatchState} from '../utils/models';
 
 function App() {
   const [

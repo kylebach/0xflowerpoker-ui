@@ -2,12 +2,11 @@
 import {ethers} from 'ethers';
 import {useState} from 'react';
 import {FlowerPoker} from '../../0xflowerpoker/typechain-types';
+import {Match, MatchState} from '../utils/models';
 import {
   AlchemyAPIKey,
   ContractAddress,
   FlowerPokerABI,
-  Match,
-  MatchState,
   Network,
 } from '../utils/utils';
 
