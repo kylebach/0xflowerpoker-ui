@@ -10,6 +10,7 @@ node {
       sh 'printenv'
     }
     stage('Build and Publish Docker image'){
+     sh 'git submodule update --init'  
      sh 'docker build -t 0xflowerpoker .'
      sh 'docker tag 0xflowerpoker docker.i.bachin.ski:5011/0xflowerpoker'
      sh 'docker push docker.i.bachin.ski:5011/0xflowerpoker'
