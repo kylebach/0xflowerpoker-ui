@@ -1,6 +1,6 @@
-/// <reference types="react-scripts" />
+/* eslint-disable no-unused-vars */
 
-import { ethers } from "ethers";
+import {ethers} from 'ethers';
 
 declare global {
     interface Window {
