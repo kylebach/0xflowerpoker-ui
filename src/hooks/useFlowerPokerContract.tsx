@@ -5,41 +5,73 @@ import {FlowerPoker} from '../../0xflowerpoker/typechain-types';
 import {Match, MatchState} from '../utils/models';
 import {
   AlchemyAPIKey,
+  ChainId,
   ContractAddress,
   FlowerPokerABI,
+  MetaMaskText,
   Network,
+  SwitchNetworkText,
 } from '../utils/utils';
 
 export const useFlowerPokerContract = () => {
+  const [matchCount, setMatchCount] = useState<Number>(0);
   const [matchesReady, setMatchesReady] = useState<Match[]>([]);
   const [matchesCompleted, setMatchesCompleted] = useState<Match[]>([]);
   const [askSize, setAskSize] = useState(1);
   const [contract, setContract] = useState<FlowerPoker>();
   const [gprovider, setGprovider] = useState<ethers.providers.Web3Provider>();
+  const [account, setAccount] = useState<any>(MetaMaskText);
+  const [connectButtonText, setConnectButtonText] = useState<string>('');
+  const [writeContract, setWriteContract] = useState<FlowerPoker>();
 
-  function getContract(): FlowerPoker {
-    if (contract !== undefined) return contract;
-    let providedContract;
-    if (window.ethereum) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      setGprovider(provider);
-      providedContract = new ethers.Contract(
-          ContractAddress, FlowerPokerABI, signer);
-    } else {
-      const provider = new ethers.providers.AlchemyWebSocketProvider(
-          Network, AlchemyAPIKey);
-      providedContract = new ethers.Contract(
-          ContractAddress, FlowerPokerABI, provider);
+  function makeWSContract(): FlowerPoker {
+    const provider = new ethers.providers.AlchemyWebSocketProvider(
+        Network, AlchemyAPIKey);
+    return new ethers.Contract(
+        ContractAddress, FlowerPokerABI, provider) as FlowerPoker;
+  }
+
+  function makeRWContract(): FlowerPoker | undefined {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const localAccount = provider.send('eth_requestAccounts', []);
+
+    if (localAccount === undefined) {
+      setAccount(MetaMaskText);
+      return undefined;
     }
-    setContract(providedContract as FlowerPoker);
+
+    const signer = provider.getSigner();
+    const providedContract = new ethers.Contract(
+        ContractAddress, FlowerPokerABI, signer);
+    setGprovider(provider);
+    setAccount(localAccount);
+
     return providedContract as FlowerPoker;
+  }
+
+  function getContract(RW: boolean = false): FlowerPoker {
+    if (!RW && contract !== undefined && account !== undefined) return contract;
+    if (RW && writeContract !== undefined && account !== undefined) {
+      return writeContract;
+    }
+
+    const localContract = makeWSContract();
+    let localWriteContract;
+    setContract(localContract);
+    if (window.ethereum) {
+      localWriteContract = makeRWContract();
+      setWriteContract(localWriteContract);
+    }
+    if (RW) {
+      return localWriteContract as FlowerPoker;
+    }
+    return localContract as FlowerPoker;
   }
 
   async function makeOffer(event: any) {
     event.preventDefault();
     if (typeof window.ethereum !== 'undefined') {
-      const contract = getContract();
+      const contract = getContract(true);
       try {
         const res = await contract.createMatch(
             ethers.utils.parseEther('' + askSize), {
@@ -57,7 +89,7 @@ export const useFlowerPokerContract = () => {
   async function makeHouseOffer(event: any) {
     event.preventDefault();
     if (typeof window.ethereum !== 'undefined') {
-      const contract = getContract();
+      const contract = getContract(true);
       try {
         const res = await contract.createHouseMatch(
             ethers.utils.parseEther('' + askSize), {
@@ -108,7 +140,31 @@ export const useFlowerPokerContract = () => {
     return matchesCompleted.length + matchesReady.length;
   }
 
-  function onEvents() {
+  async function effect() {
+    setConnectButtonText(await makeConnectButtonText());
+    await loadMatches();
+
+    async function loadMatches() {
+      await gprovider?.send('eth_requestAccounts', []).then();
+      const lmatchCount = await getReadyMatches();
+      console.log('Got %d new matches', lmatchCount);
+      setMatchCount(lmatchCount);
+    }
+
+    async function makeConnectButtonText(): Promise<string> {
+      let text = account;
+      if (account !== undefined && account !== MetaMaskText) {
+        const network = await gprovider?.getNetwork();
+        if (network !== undefined) {
+          if (network.chainId !== ChainId) {
+            text = SwitchNetworkText;
+            setContract(makeWSContract());
+          }
+        }
+      }
+      return text;
+    }
+
     const contract = getContract();
     contract.on('FlowersPicked', (event) => {
       getReadyMatches().then();
@@ -127,17 +183,6 @@ export const useFlowerPokerContract = () => {
     });
   }
 
-  function effect() {
-    console.log('getting matches');
-    loadMatches().then();
-    async function loadMatches() {
-      await gprovider?.send('eth_requestAccounts', []).then();
-      const matchCount = await getReadyMatches();
-      console.log('loaded ', matchCount);
-    }
-    onEvents();
-  }
-
   return [
     matchesReady,
     matchesCompleted,
@@ -147,5 +192,7 @@ export const useFlowerPokerContract = () => {
     effect,
     askSize,
     setAskSize,
+    matchCount,
+    connectButtonText,
   ] as const;
 };

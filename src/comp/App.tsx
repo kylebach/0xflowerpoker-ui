@@ -18,17 +18,19 @@ function App() {
     effect,
     askSize,
     setAskSize,
+    matchCount,
+    connectButtonText,
   ] = useFlowerPokerContract();
 
   useEffect(() => {
     effect();
-  }, []);
+  }, [connectButtonText, matchCount]);
 
   function generateNewMatchForm(): ReactElement {
     return (
       <div className="box" key="button-box">
         <b>New Match</b>
-        <div className="">
+        <div className="box">
           <input
             className="input"
             value={askSize}
@@ -42,11 +44,9 @@ function App() {
           />
           <br></br>
           <br></br>
-          <div className="group">
-            <div className="columns">
-              <button className="column button is-info" onClick={makeOffer}>Bet vs player</button>
-              <button className="column button is-primary" onClick={makeHouseOffer}>Bet vs house</button>
-            </div>
+          <div className="columns">
+            <button className="column button is-info" onClick={makeOffer}>Bet vs player</button>
+            <button className="column button is-primary" onClick={makeHouseOffer}>Bet vs house</button>
           </div>
         </div>
       </div>
@@ -166,16 +166,16 @@ function App() {
 
   return (
     <div className="App">
-      {/* <div className="navbar box">
+      <div className="navbar box">
         <div className="navbar-item">
           0xflowerpoker
         </div>
-        <div>
-          <button>
-            connect
+        <div className="navbar-end">
+          <button className="button is-primary">
+            {connectButtonText}
           </button>
         </div>
-      </div> */}
+      </div>
       <div className="matches container is-max-desktop">
         {generateNewMatchForm()}
         <div className="box">
