@@ -16,6 +16,7 @@ export const useFlowerPokerContract = () => {
   const [askSize, setAskSize] = useState(1);
   const [askSizeHouse, setAskSizeHouse] = useState(1);
   const [contract, setContract] = useState<FlowerPoker>();
+  const [gprovider, setGprovider] = useState<ethers.providers.Web3Provider>();
 
   function getContract(): FlowerPoker {
     if (contract !== undefined) return contract;
@@ -23,6 +24,7 @@ export const useFlowerPokerContract = () => {
     if (window.ethereum) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
+      setGprovider(provider);
       providedContract = new ethers.Contract(
           ContractAddress, FlowerPokerABI, signer);
     } else {
@@ -130,6 +132,7 @@ export const useFlowerPokerContract = () => {
     console.log('getting matches');
     loadMatches().then();
     async function loadMatches() {
+      await gprovider?.send('eth_requestAccounts', []).then();
       const matchCount = await getReadyMatches();
       console.log('loaded ', matchCount);
     }
