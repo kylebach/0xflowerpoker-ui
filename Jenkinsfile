@@ -13,7 +13,7 @@ node {
       sh 'git submodule update --init'
     }
     stage('Build'){
-     sh 'docker build -t 0xflowerpoker .'
+     sh 'docker build -t 0xflowerpoker . --network=host'
      sh 'docker tag 0xflowerpoker localhost:5011/0xflowerpoker'
      sh 'docker push localhost:5011/0xflowerpoker'
     }
