@@ -16,14 +16,14 @@ node {
     stage('Build'){
      sh 'docker build -t 0xflowerpoker .'
      sh 'docker tag 0xflowerpoker localhost:5555/0xflowerpoker'
-     sh 'docker push localhost:5555/bachin.ski'
+     sh 'docker push localhost:5555/0xflowerpoker'
     }
     stage('Deploy Docker image'){
       if(env.BRANCH_NAME == 'master' || env.BRANCH_NAME == null){
         sh 'docker rmi -f bachin.ski localhost:5555/0xflowerpoker'
         sh 'docker stop 0xflowerpoker || true'
         sh 'docker rm 0xflowerpoker || true'
-        sh 'docker run -d --restart unless-stopped --name 0xflowerpoker -p 3050:3000 0xflowerpoker'
+        sh 'docker run -d --restart unless-stopped --name 0xflowerpoker -p 3050:3000 localhost:5555/0xflowerpoker'
       }
     }
   }
