@@ -7,6 +7,7 @@ import React, {ReactElement, useEffect} from 'react';
 import {useFlowerPokerContract} from '../hooks/useFlowerPokerContract';
 import {Match, MatchResult, MatchState} from '../utils/models';
 import 'bulma/css/bulma.min.css';
+import {MetaMaskText, SwitchNetworkText} from '../utils/utils';
 
 function App() {
   const [
@@ -164,6 +165,42 @@ function App() {
     );
   }
 
+  function switchNetwork() {
+    window.ethereum.request?.({
+      method: 'wallet_addEthereumChain',
+      params: [{
+        chainId: '0x89',
+        rpcUrls: ['https://rpc-mainnet.matic.network/'],
+        chainName: 'Matic Mainnet',
+        nativeCurrency: {
+          name: 'MATIC',
+          symbol: 'MATIC',
+          decimals: 18,
+        },
+        blockExplorerUrls: ['https://polygonscan.com/'],
+      }],
+    }).then(
+        () => window.location.reload(),
+    );
+  }
+
+  function makeWeb3Button(): ReactElement {
+    const text = connectButtonText;
+    let tags = 'button is-primary';
+    let onClick = () => {};
+    if (text === SwitchNetworkText) {
+      tags = 'button is-danger';
+      onClick = switchNetwork;
+    } else if (text === MetaMaskText) {
+      tags = 'button is-warning';
+    }
+    return (
+      <button className={tags} onClick={onClick}>
+        {text}
+      </button>
+    );
+  }
+
   return (
     <div className="App">
       <div className="navbar box">
@@ -171,9 +208,7 @@ function App() {
           0xflowerpoker
         </div>
         <div className="navbar-end">
-          <button className="button is-primary">
-            {connectButtonText}
-          </button>
+          {makeWeb3Button()}
         </div>
       </div>
       <div className="matches container is-max-desktop">
