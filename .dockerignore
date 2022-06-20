@@ -1,0 +1,8 @@
+node_modules
+tests
+0xflowerpoker/artifacts
+0xflowerpoker/abi
+0xflowerpoker/cache
+0xflowerpoker/node_modules
+0xflowerpoker/tests
+0xflowerpoker/typechain-types
