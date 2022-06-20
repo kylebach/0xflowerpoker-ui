@@ -73,6 +73,15 @@ function App() {
     return '0x' + addr.substring(2, 6).toUpperCase() + '...' + addr.substring(addr.length - 5, addr.length - 1).toUpperCase();
   }
 
+  function humanizeText(s: string): string {
+    return s.toLowerCase().split('_').map((p) => {
+      if (p.length <= 2) {
+        return p;
+      }
+      return p[0].toUpperCase() + p.substring(1, p.length);
+    }).reduce((x, xs) => x + ' ' + xs);
+  }
+
   function matchToFlowerPatch(match: Match, player1: boolean): ReactElement {
     let p1 = [];
     const p2 = [];
@@ -98,7 +107,7 @@ function App() {
       <div key={player1 ? match.player1Result.toString() : match.player2Result.toString()}>
         {p1.map((it) => numToFlower(it, player1?'p1' + (c++).toString():'p2' + (c++).toString()))}
         <br></br>
-        {text}
+        {humanizeText(text)}
         <br></br>
         {addr}
       </div>
@@ -121,7 +130,7 @@ function App() {
             {matchToFlowerPatch(match, false)}
           </div>
           <div className="column">
-            {MatchState[match.state]}
+            {humanizeText(MatchState[match.state]).replace('Both', '')}
             <br></br>
             {'pot Ξ' + ethers.utils.formatUnits(match.sum.toString()).substring(0, 5)}
             <br></br>
@@ -143,7 +152,7 @@ function App() {
             {shortenAddr(match.player1)}
           </div>
           <div className="column">
-            {MatchState[match.state]}
+            {humanizeText(MatchState[match.state])}
             <br></br>
             {'current pot Ξ' + ethers.utils.formatUnits(match.sum.toString()).substring(0, 5)}
           </div>
