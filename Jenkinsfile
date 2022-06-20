@@ -8,11 +8,9 @@ node {
       echo "Branch: ${env.BRANCH_NAME}"
       sh 'docker -v'
       sh 'printenv'
+      sh 'git submodule update --init'
     }
-    stage('Build and Publish Docker image'){
-     sh 'git submodule update --init'
-     sh 'cd ./0xflowerpoker && npm install && cd ..'
-     sh 'npm install'
+    stage('Build'){
      sh 'docker build -t 0xflowerpoker .'
     }
     stage('Deploy Docker image'){
