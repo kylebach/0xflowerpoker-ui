@@ -8,9 +8,12 @@ node {
       echo "Branch: ${env.BRANCH_NAME}"
       sh 'docker -v'
       sh 'printenv'
-      sh 'git submodule update --init'
     }
-    stage('Build'){
+    stage('Build Contract') {
+      sh 'git submodule update --init'
+      sh 'cd 0xflowerpoker && npm install && ./node_modules/.bin/hardhat compile'
+    }
+    stage('Build image'){
      sh 'docker build -t 0xflowerpoker .'
     }
     stage('Deploy Docker image'){
