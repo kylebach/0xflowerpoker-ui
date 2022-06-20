@@ -26,7 +26,7 @@ function App() {
 
   function generateNewMatchForm(): ReactElement {
     return (
-      <div className="box">
+      <div className="box" key="button-box">
         <b>New Match</b>
         <div className="">
           <input
@@ -44,8 +44,8 @@ function App() {
           <br></br>
           <div className="group">
             <div className="columns">
-              <button className="column button is-info" onClick={makeOffer}>Open bet vs player</button>
-              <button className="column button is-primary" onClick={makeHouseOffer}>Bet against house</button>
+              <button className="column button is-info" onClick={makeOffer}>Bet vs player</button>
+              <button className="column button is-primary" onClick={makeHouseOffer}>Bet vs house</button>
             </div>
           </div>
         </div>
@@ -62,10 +62,10 @@ function App() {
     );
   }
 
-  function numToFlower(f: Number): ReactElement {
+  function numToFlower(f: Number, p: string): ReactElement {
     const path = '/flowers/' + f.toString() + '.png';
     return (
-      <img src={path} alt={f.toString()}></img>
+      <img src={path} alt={f.toString()} key={f.toString() + p}></img>
     );
   }
 
@@ -93,9 +93,10 @@ function App() {
     const text = player1 ? MatchResult[match.player1Result] : MatchResult[match.player2Result];
     let addr = player1 ? match.player1.toString() : match.player2.toString();
     addr = shortenAddr(addr);
+    let c = 0;
     return (
-      <div>
-        {p1.map((it) => numToFlower(it))}
+      <div key={player1 ? match.player1Result.toString() : match.player2Result.toString()}>
+        {p1.map((it) => numToFlower(it, player1?'p1' + (c++).toString():'p2' + (c++).toString()))}
         <br></br>
         {text}
         <br></br>
@@ -108,7 +109,7 @@ function App() {
     let winner = match.state == MatchState.TIE_BOTH ? undefined : MatchState.PLAYER_ONE ? match.player1.toString() : match.player2.toString();
     winner = winner === undefined ? undefined : shortenAddr(winner);
     return (
-      <div className="box">
+      <div className="box" key={match.id.toString()}>
         <div className="columns">
           <div className="id column">
             #<b>{match.id.toString()}</b>
@@ -133,7 +134,7 @@ function App() {
 
   function matchToCardReady(match: Match): ReactElement {
     return (
-      <div className="box">
+      <div className="box" key={match.id.toString()}>
         <div className="columns">
           <div className="id column">
             #<b>{match.id.toString()}</b>
@@ -156,6 +157,16 @@ function App() {
 
   return (
     <div className="App">
+      {/* <div className="navbar box">
+        <div className="navbar-item">
+          0xflowerpoker
+        </div>
+        <div>
+          <button>
+            connect
+          </button>
+        </div>
+      </div> */}
       <div className="matches container is-max-desktop">
         {generateNewMatchForm()}
         <div className="box">

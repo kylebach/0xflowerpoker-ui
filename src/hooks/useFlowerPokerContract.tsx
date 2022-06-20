@@ -39,7 +39,7 @@ export const useFlowerPokerContract = () => {
   async function makeOffer(event: any) {
     event.preventDefault();
     if (typeof window.ethereum !== 'undefined') {
-      const contract = await getContract();
+      const contract = getContract();
       try {
         const res = await contract.createMatch(
             ethers.utils.parseEther('' + askSize), {
@@ -57,7 +57,7 @@ export const useFlowerPokerContract = () => {
   async function makeHouseOffer(event: any) {
     event.preventDefault();
     if (typeof window.ethereum !== 'undefined') {
-      const contract = await getContract();
+      const contract = getContract();
       try {
         const res = await contract.createHouseMatch(
             ethers.utils.parseEther('' + askSize), {
