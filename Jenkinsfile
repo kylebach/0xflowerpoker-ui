@@ -11,7 +11,6 @@ node {
     }
     stage('Build Contract') {
       sh 'git submodule update --init'
-      sh 'cd 0xflowerpoker && npm install && ./node_modules/.bin/hardhat compile'
     }
     stage('Build'){
      sh 'docker build -t 0xflowerpoker .'
