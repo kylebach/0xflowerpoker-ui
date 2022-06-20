@@ -14,7 +14,6 @@ export const useFlowerPokerContract = () => {
   const [matchesReady, setMatchesReady] = useState<Match[]>([]);
   const [matchesCompleted, setMatchesCompleted] = useState<Match[]>([]);
   const [askSize, setAskSize] = useState(1);
-  const [askSizeHouse, setAskSizeHouse] = useState(1);
   const [contract, setContract] = useState<FlowerPoker>();
   const [gprovider, setGprovider] = useState<ethers.providers.Web3Provider>();
 
@@ -61,8 +60,8 @@ export const useFlowerPokerContract = () => {
       const contract = await getContract();
       try {
         const res = await contract.createHouseMatch(
-            ethers.utils.parseEther('' + askSizeHouse), {
-              value: ethers.utils.parseEther('' + askSizeHouse),
+            ethers.utils.parseEther('' + askSize), {
+              value: ethers.utils.parseEther('' + askSize),
               gasLimit: 500000,
             });
         await res.wait();
@@ -85,7 +84,7 @@ export const useFlowerPokerContract = () => {
     try {
       const matchesReady = []; const matchesCompleted = [];
       const matchCount = await contract.matchCount();
-      for (let i = 0; i < matchCount.toNumber(); i++) {
+      for (let i = matchCount.toNumber() - 1; i >= 0; i--) {
         const match: Match = await contract.matches(i);
         switch (match.state) {
           case MatchState.READY:
@@ -148,7 +147,5 @@ export const useFlowerPokerContract = () => {
     effect,
     askSize,
     setAskSize,
-    askSizeHouse,
-    setAskSizeHouse,
   ] as const;
 };
